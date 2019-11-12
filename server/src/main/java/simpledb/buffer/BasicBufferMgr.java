@@ -10,6 +10,8 @@ import simpledb.file.*;
 class BasicBufferMgr {
    private Buffer[] bufferpool;
    private int numAvailable;
+   private Integer clockhand;
+   private int strategy;
    
    /**
     * Creates a buffer manager having the specified number 
@@ -112,8 +114,88 @@ class BasicBufferMgr {
    
    private Buffer chooseUnpinnedBuffer() {
       for (Buffer buff : bufferpool)
-         if (!buff.isPinned())
-         return buff;
+         if(buff.block() == null){
+             return buff;
+         }
+      
       return null;
    }
+   
+   public Buffer[] getBuffers() {
+        return this.bufferpool;
+    }
+
+    /**
+     * Set buffer selection strategy
+     *
+     * @param s (cases: 0 - Naive, 1 - FIFO, 2 - LRU, 3 - Clock)
+     */
+    public void setStrategy(int s) {
+        this.strategy = s;
+    }
+    
+    private Buffer useNaiveStrategy() {
+        for (Buffer b : bufferpool) {
+            if (!b.isPinned()) {
+                return b;
+            }
+        }
+        switch (this.strategy) {
+            case 0:
+                return useNaiveStrategy();
+            case 1:
+                return useFIFOStrategy();
+            case 2:
+                return useLRUStrategy();
+            case 3:
+                return useClockStrategy();
+            default:
+                return null;
+    } 
 }
+    
+    private Buffer useFIFOStrategy() {
+        Buffer dbBuffer = null;
+        long min = Long.MAX_VALUE; // shortest time in pool
+        for (Buffer b : bufferpool){
+            if(!b.isPinned() && (b.getTimeIn() < min)){
+                min = b.getTimeIn();
+                dbBuffer = b;
+            }
+        }
+        return dbBuffer;
+    }
+    
+    private Buffer useLRUStrategy() {
+        Buffer dbBuffer = null;
+        long min = Long.MAX_VALUE; //shortest time out
+        for (Buffer b : bufferpool){
+            if(!b.isPinned() && (b.getTimeOut() < min)){
+                min = b.getTimeOut();
+                dbBuffer = b;
+            }
+        }
+        return dbBuffer;
+    }
+    
+    private Buffer useClockStrategy() {
+        if(clockhand == null){
+            long lastUnpin = Long.MIN_VALUE; //last unpinned buffer
+            for(int i = 0; i < bufferpool.length; ++i){
+                if (!bufferpool[i].isPinned() && bufferpool[i].getTimeOut() > lastUnpin){
+                    clockhand = i;
+                    lastUnpin = bufferpool[clockhand].getTimeOut();
+                }
+            }
+        }
+        for(int i = clockhand + 1; i < bufferpool.length + clockhand; ++i){
+            if(!bufferpool[i % bufferpool.length].isPinned()){
+                clockhand = i % bufferpool.length;
+                return bufferpool[i % bufferpool.length];
+            }
+        }
+        return null;
+    }
+}
+
+    

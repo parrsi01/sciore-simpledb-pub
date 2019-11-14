@@ -35,6 +35,9 @@ public class BufferMgr {
     * is called first.
     * @param numbuffers the number of buffer slots to allocate
     */
+   
+   
+   
    public BufferMgr(int numbuffers) {
       bufferMgr = new BasicBufferMgr(numbuffers);
    }
@@ -118,7 +121,19 @@ public class BufferMgr {
       return bufferMgr.available();
    }
    
+   
    private boolean waitingTooLong(long starttime) {
       return System.currentTimeMillis() - starttime > MAX_TIME;
    }
+   
+   public Buffer[] getBuffers() {
+       return bufferMgr.getBuffers();
+   }
+   
+   public void setStrategy(int s) {
+        bufferMgr.setStrategy(s);
+    }
+   
+   
+   
 }

@@ -13,6 +13,7 @@ class BasicBufferMgr {
     private Buffer[] bufferpool;
     private int numAvailable;
     private int strategy;
+    private Integer clock = null;
 
     /**
      * Creates a buffer manager having the specified number of buffer slots.
@@ -173,7 +174,16 @@ class BasicBufferMgr {
      * @return
      */
     private Buffer useFIFOStrategy() {
-        throw new UnsupportedOperationException();
+        Buffer fifoBuffer = null;
+        long min = Long.MAX_VALUE; //minimal time inside buffer
+        for (Buffer buff : bufferpool){
+            if(!buff.isPinned() && (buff.getTimeIn() < min)){
+                min = buff.getTimeIn();
+                fifoBuffer = buff;
+            }
+        }
+        return fifoBuffer;
+        //throw new UnsupportedOperationException();
     }
 
     /**
@@ -182,7 +192,16 @@ class BasicBufferMgr {
      * @return
      */
     private Buffer useLRUStrategy() {
-        throw new UnsupportedOperationException();
+        Buffer lruBuffer = null;
+        long min_time_out = Long.MAX_VALUE; //minimal time out of buffer
+        for (Buffer buff : bufferpool){
+            if(!buff.isPinned() && (buff.getTimeOut() < min_time_out)){
+                min_time_out = buff.getTimeOut();
+                lruBuffer = buff;
+            }
+        }
+        return lruBuffer;
+        //throw new UnsupportedOperationException();
     }
 
     /**
@@ -191,6 +210,22 @@ class BasicBufferMgr {
      * @return
      */
     private Buffer useClockStrategy() {
-        throw new UnsupportedOperationException();
+        if(clock == null){
+            long last_unpin = Long.MIN_VALUE; // last unpinned buffer recently used.
+            for(int i = 0; i < bufferpool.length; ++i){
+                if (!bufferpool[i].isPinned() && bufferpool[i].getTimeOut() > last_unpin){
+                    clock = i;
+                    last_unpin = bufferpool[clock].getTimeOut();
+                }
+            }
+        }
+        for(int i = clock + 1; i < bufferpool.length + clock; ++i){
+            if(!bufferpool[i % bufferpool.length].isPinned()){
+                clock = i % bufferpool.length;
+                return bufferpool[i % bufferpool.length];
+            }
+        }
+        return null;
+        //throw new UnsupportedOperationException();
     }
 }

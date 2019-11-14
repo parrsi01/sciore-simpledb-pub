@@ -19,6 +19,10 @@ public class Buffer {
    private int pins = 0;
    private int modifiedBy = -1;  // negative means not modified
    private int logSequenceNumber = -1; // negative means no corresponding log record
+   private long timeIn = -1;
+   private long timeOut = -1;
+   
+   
 
    /**
     * Creates a new buffer, wrapping a new 
@@ -110,6 +114,11 @@ public class Buffer {
    public Block block() {
       return blk;
    }
+   
+   public long getTimeIn() {return this.timeIn;}
+   public void setTimeIn() {this.timeIn = System.nanoTime();}
+   public void setTimeOut() {this.timeOut = System.nanoTime();}
+   public long getTimeOut() {return this.timeOut;}
 
    /**
     * Writes the page to its disk block if the
@@ -130,14 +139,18 @@ public class Buffer {
     * Increases the buffer's pin count.
     */
    void pin() {
+      setTimeIn();
       pins++;
+      
    }
 
    /**
     * Decreases the buffer's pin count.
     */
    void unpin() {
+      setTimeOut();
       pins--;
+      
    }
 
    /**
@@ -146,6 +159,7 @@ public class Buffer {
     * @return true if the buffer is pinned
     */
    boolean isPinned() {
+       
       return pins > 0;
    }
 
@@ -187,4 +201,6 @@ public class Buffer {
       blk = contents.append(filename);
       pins = 0;
    }
+   
+   
 }

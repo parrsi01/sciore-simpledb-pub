@@ -2,6 +2,7 @@ package simpledb.buffer;
 
 import simpledb.server.SimpleDB;
 import simpledb.file.*;
+
 /**
  * An individual buffer.
  * A buffer wraps a page and stores information about its status,
@@ -18,8 +19,6 @@ public class Buffer {
    private int pins = 0;
    private int modifiedBy = -1;  // negative means not modified
    private int logSequenceNumber = -1; // negative means no corresponding log record
-   private long timein=-1; //saving time in counter to the buffer
-   private long timeout=-1; //saving time out counter to the buffer 
 
    /**
     * Creates a new buffer, wrapping a new 
@@ -111,9 +110,6 @@ public class Buffer {
    public Block block() {
       return blk;
    }
-   
-   public long getTimeIn() {return this.timein;}
-   public long getTimeOut() {return this.timeout;}
 
    /**
     * Writes the page to its disk block if the
@@ -134,15 +130,13 @@ public class Buffer {
     * Increases the buffer's pin count.
     */
    void pin() {
-      this.timein = System.nanoTime();
       pins++;
    }
 
    /**
     * Decreases the buffer's pin count.
     */
-   void unpin() { 
-      this.timeout = System.nanoTime();
+   void unpin() {
       pins--;
    }
 

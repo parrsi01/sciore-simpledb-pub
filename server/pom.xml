@@ -14,7 +14,7 @@
     <name>SimpleDB Server</name>
 
     <build>
-        <plugins>
+<!--        <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>rmic-maven-plugin</artifactId>
@@ -34,7 +34,7 @@
                     </execution>
                 </executions>
             </plugin>
-        </plugins>
+        </plugins>-->
     </build>
 
 </project>

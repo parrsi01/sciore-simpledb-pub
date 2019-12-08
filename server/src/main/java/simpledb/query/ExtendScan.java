@@ -10,45 +10,45 @@ package simpledb.query;
  * @author simon
  */
 public class ExtendScan implements Scan {
-    private Scan s1;
+    private Scan s;
     private String field;
     private Integer type, size;
 
 
-    public ExtendScan(Scan s1, String field, Integer type, Integer size) {
-        this.s1 = s1;
-        s1.next();
+    public ExtendScan(Scan s, String field, Integer type, Integer size) {
+        this.s = s;
+        s.next();
         this.field = field;
         this.type = type;
         this.size = size;
     }
 
     public void beforeFirst() {
-        s1.beforeFirst();
+        s.beforeFirst();
         
     }
 
     public boolean next() {
-        return s1.next();
+        return s.next();
     }
 
     public void close() {
-        s1.close();
+        s.close();
     }
 
     public Constant getVal(String fldname) {
-        return s1.getVal(fldname);
+        return s.getVal(fldname);
     }
 
     public int getInt(String fldname) {
-        return s1.getInt(fldname);
+        return s.getInt(fldname);
     }
 
     public String getString(String fldname) {
-        return s1.getString(fldname);
+        return s.getString(fldname);
     }
 
     public boolean hasField(String fldname) {
-        return s1.hasField(fldname);
+        return s.hasField(fldname);
     }
 }

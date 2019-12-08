@@ -5,7 +5,7 @@
  */
 package simpledb.query;
 import simpledb.record.Schema;
-import java.util.Map;
+import java.util.*;
 
 /**
  *
@@ -13,36 +13,36 @@ import java.util.Map;
  */
 
 public class ExtendPlan implements Plan {
-    private Plan p1;
+    private Plan p;
     private Schema schema = new Schema();
     private String field;
     private Integer type, size;
 
 
-    public ExtendPlan(Plan p1, String field, Integer type, Integer size) {
-        this.p1 = p1;
+    public ExtendPlan(Plan p, String field, Integer type, Integer size) {
+        this.p = p;
         this.field = field;
         this.type = type;
         this.size = size;
-        p1.schema().addField(field, type, size);
-        schema.addAll(p1.schema());
+        p.schema().addField(field, type, size);
+        schema.addAll(p.schema());
     }
 
     public Scan open() {
-        Scan s1 = p1.open();
-        return new ExtendScan(s1,field,type,size);
+        Scan s = p.open();
+        return new ExtendScan(s,field,type,size);
     }
 
     public int blocksAccessed() {
-        return p1.blocksAccessed();
+        return p.blocksAccessed();
     }
 
     public int recordsOutput() {
-        return p1.recordsOutput();
+        return p.recordsOutput();
     }
 
     public int distinctValues(String fldname) {
-        return p1.distinctValues(fldname);
+        return p.distinctValues(fldname);
     }
 
     public Schema schema() {

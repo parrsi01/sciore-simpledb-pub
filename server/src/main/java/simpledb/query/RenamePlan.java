@@ -1,3 +1,4 @@
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -12,47 +13,55 @@ import java.util.*;
  * @author simon
  */
 public class RenamePlan implements Plan {
-    private Plan p1;
+    private Plan p;
     private Schema schema = new Schema();
-    private String tgtCol, renameCol;
-
-
-    public RenamePlan(Plan p1, String tgtCol, String renameCol) {
-        this.p1 = p1;
-        this.tgtCol = tgtCol;
-        this.renameCol = renameCol;
-        executeRename();
-        schema.addAll(p1.schema());
+    
+    public RenamePlan(Plan p, String oldName, String newName) {
+        this.p = p;
+        int type = p.schema().type(oldName);
+        int length = p.schema().length(oldName);
+        for (String fldname: p.schema().fields())
+            if (!fldname.equals(oldName)) {
+                schema.add(fldname, p.schema());
+            }
+        schema.addField(newName, type, length);
     }
-
-    public void executeRename(){
-        if (p1.schema().hasField(tgtCol)) {
-            Map<String, Schema.FieldInfo> info = p1.schema().getInfo();
-            Schema.FieldInfo retainField = info.remove(tgtCol);
-            info.put(renameCol, retainField);
-            p1.schema().setInfo(info);
-        }
-
-    }
-
+    
     public Scan open() {
-        Scan s1 = p1.open();
-        return new RenameScan(s1, tgtCol, renameCol);
-    }
-
-    public int blocksAccessed() {
-        return p1.blocksAccessed();
-    }
-
-    public int recordsOutput() {
-        return p1.recordsOutput();
-    }
-
-    public int distinctValues(String fldname) {
-        return p1.distinctValues(fldname);
-    }
-
-    public Schema schema() {
-        return schema;
-    }
+      Scan s = p.open();
+      return new ProjectScan(s, schema.fields());
+   }
+   
+   /**
+    * Estimates the number of block accesses in the projection,
+    * which is the same as in the underlying query.
+    */
+   public int blocksAccessed() {
+      return p.blocksAccessed();
+   }
+   
+   /**
+    * Estimates the number of output records in the projection,
+    * which is the same as in the underlying query.
+    */
+   public int recordsOutput() {
+      return p.recordsOutput();
+   }
+   
+   /**
+    * Estimates the number of distinct field values
+    * in the projection,
+    * which is the same as in the underlying query.
+    */
+   public int distinctValues(String fldname) {
+      return p.distinctValues(fldname);
+   }
+   
+   /**
+    * Returns the schema of the projection,
+    * which is taken from the field list.
+    */
+   public Schema schema() {
+      return schema;
+   }
 }

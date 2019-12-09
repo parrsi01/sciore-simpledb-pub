@@ -6,7 +6,6 @@
  */
 package simpledb.query;
 import simpledb.record.Schema;
-import java.util.*;
 
 /**
  *
@@ -32,35 +31,22 @@ public class RenamePlan implements Plan {
       return new ProjectScan(s, schema.fields());
    }
    
-   /**
-    * Estimates the number of block accesses in the projection,
-    * which is the same as in the underlying query.
-    */
+  
    public int blocksAccessed() {
       return p.blocksAccessed();
    }
    
-   /**
-    * Estimates the number of output records in the projection,
-    * which is the same as in the underlying query.
-    */
+ 
    public int recordsOutput() {
       return p.recordsOutput();
    }
    
-   /**
-    * Estimates the number of distinct field values
-    * in the projection,
-    * which is the same as in the underlying query.
-    */
+  
    public int distinctValues(String fldname) {
       return p.distinctValues(fldname);
    }
    
-   /**
-    * Returns the schema of the projection,
-    * which is taken from the field list.
-    */
+ 
    public Schema schema() {
       return schema;
    }
